@@ -7,9 +7,7 @@ from app.schemas.chat import (
 
 from app.services.chat_service import ChatService
 
-
 from sse_starlette.sse import EventSourceResponse
-
 
 router = APIRouter(
     prefix="/chat",
@@ -30,11 +28,12 @@ async def chat(
         user_message=payload.message,
     )
 
-
     return response
+
+
 @router.post("/stream")
 async def stream_chat(
-    payload: ChatRequest
+    payload: ChatRequest,
 ):
 
     async def event_generator():
@@ -43,19 +42,16 @@ async def stream_chat(
             conversation_id=payload.conversation_id,
             user_message=payload.message,
         ):
-
-            print("TOKEN:", token)
-
             yield {
-                "event": "token",
                 "data": token
             }
 
         yield {
-            "event": "end",
-            "data": "done"
+            "data": "[DONE]"
         }
 
     return EventSourceResponse(
         event_generator()
+    
+    
     )

@@ -20,6 +20,7 @@ const Chat = () => {
   const [loadingChats, setLoadingChats] = useState(true);   // sidebar skeleton
   const [loadingMessages, setLoadingMessages] = useState(false); // message area skeleton
   const [streaming, setStreaming] = useState(false);         // disable input while streaming
+  const [sidebarOpen, setSidebarOpen] = useState(false);     // mobile responsive sidebar toggle
 
   // --------------------------------
   // Load Conversations
@@ -82,9 +83,25 @@ const Chat = () => {
   // --------------------------------
   const handleSendMessage = useCallback(
     async (text) => {
-      if (!activeChatId || streaming) return;
+      if (streaming) return;
 
       setStreaming(true);
+
+      let chatId = activeChatId;
+
+      // If no conversation is active, dynamically create one
+      if (!chatId) {
+        try {
+          const conversation = await createConversation();
+          chatId = conversation.conversation_id;
+          setActiveChatId(chatId);
+          await loadConversations();
+        } catch (error) {
+          console.error("Failed to create conversation:", error);
+          setStreaming(false);
+          return;
+        }
+      }
 
       const userMessage = {
         id: Date.now(),
@@ -105,10 +122,19 @@ const Chat = () => {
 
       try {
         await streamChat({
-          conversationId: activeChatId,
+          conversationId: chatId,
           message: text,
           onToken: (token) => {
+            console.log(
+              "TOKEN RECEIVED =",
+              JSON.stringify(token)
+            );
+
             accumulatedContent += token;
+            console.log(
+              "ACCUMULATED =",
+              JSON.stringify(accumulatedContent)
+            );
             requestAnimationFrame(() => {
               setMessages((prev) =>
                 prev.map((msg) =>
@@ -147,6 +173,16 @@ const Chat = () => {
         );
       } finally {
         setStreaming(false);
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === assistantMessage.id
+              ? {
+                  ...msg,
+                  streaming: false,
+                }
+              : msg
+          )
+        );
       }
     },
     [activeChatId, streaming, loadConversations]
@@ -164,19 +200,30 @@ const Chat = () => {
   };
 
   return (
-    <div className="flex h-screen bg-[#0f1117] font-sans overflow-hidden">
+    <div className="flex h-screen bg-[#0f1117] font-sans overflow-hidden relative">
+      {/* Backdrop for mobile */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm md:hidden transition-opacity duration-300"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       <Sidebar
         chats={conversations}
         activeChatId={activeChatId}
         onSelectChat={setActiveChatId}
         onNewChat={handleNewChat}
         loadingChats={loadingChats}
+        sidebarOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
       />
 
       <ChatWindow
         chat={currentChat}
         onSend={handleSendMessage}
         loading={loadingMessages}
+        onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
       />
     </div>
   );

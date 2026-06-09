@@ -18,7 +18,9 @@ export const streamChat = async ({
   );
 
   if (!response.ok) {
-    throw new Error(`Stream request failed: ${response.status}`);
+    throw new Error(
+      `Stream failed ${response.status}`
+    );
   }
 
   const reader = response.body.getReader();
@@ -27,35 +29,46 @@ export const streamChat = async ({
 
   while (true) {
     const { done, value } = await reader.read();
-    if (done) break;
 
-    // Accumulate into buffer to handle chunks that split across SSE lines
+    if (done) {
+      console.log("STREAM CLOSED");
+      break;
+    }
+
     buffer += decoder.decode(value, { stream: true });
+    console.log("BUFFER:", buffer);
 
     const lines = buffer.split("\n");
-    // Keep the last (potentially incomplete) line in the buffer
-    buffer = lines.pop() ?? "";
+    buffer = lines.pop(); // Keep incomplete line in buffer
 
     for (const line of lines) {
-      const trimmed = line.trim();
+      if (!line.startsWith("data:")) {
+        continue;
+      }
 
-      // Only process "data:" lines
-      if (!trimmed.startsWith("data:")) continue;
+      let token = line.replace(/^data:\s?/, "");
+      token = token.replace(/\r$/, ""); // remove trailing \r
 
-      const payload = trimmed.slice(5).trim(); // Remove "data:" prefix
+      if (token === "[DONE]") {
+        return;
+      }
 
-      // Skip stream-end signals
-      if (!payload || payload === "done" || payload === "[DONE]") continue;
-
-      onToken(payload);
+      onToken(token);
     }
   }
 
-  // Flush remaining buffer
-  if (buffer.trim().startsWith("data:")) {
-    const payload = buffer.trim().slice(5).trim();
-    if (payload && payload !== "done" && payload !== "[DONE]") {
-      onToken(payload);
+  // Handle any remaining content in the buffer
+  if (buffer) {
+    const lines = buffer.split("\n");
+    for (const line of lines) {
+      if (line.startsWith("data:")) {
+        let token = line.replace(/^data:\s?/, "");
+        token = token.replace(/\r$/, ""); // remove trailing \r
+        if (token === "[DONE]") {
+          return;
+        }
+        onToken(token);
+      }
     }
   }
 };

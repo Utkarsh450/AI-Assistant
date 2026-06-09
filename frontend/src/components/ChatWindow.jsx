@@ -32,7 +32,7 @@ const MessageSkeleton = () => (
   </div>
 );
 
-export default function ChatWindow({ chat, onSend, loading }) {
+export default function ChatWindow({ chat, onSend, loading, onToggleSidebar }) {
   const bottomRef = useRef(null);
   const messages = chat?.messages ?? [];
   const isStreaming = messages.some((m) => m.role === "assistant" && m.streaming);
@@ -57,6 +57,18 @@ export default function ChatWindow({ chat, onSend, loading }) {
           backdropFilter: "blur(12px)",
         }}
       >
+        {/* Hamburger Menu on Mobile */}
+        <button
+          onClick={onToggleSidebar}
+          className="md:hidden p-1.5 mr-2 rounded-lg text-white/60 hover:text-white hover:bg-white/[0.06] transition shrink-0"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+            <line x1="3" y1="12" x2="21" y2="12" />
+            <line x1="3" y1="6" x2="21" y2="6" />
+            <line x1="3" y1="18" x2="21" y2="18" />
+          </svg>
+        </button>
+
         <div className="flex items-center gap-2.5">
           <div className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_6px_#34d399]" />
           <span className="text-sm font-medium text-white/60">

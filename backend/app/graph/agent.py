@@ -1,13 +1,13 @@
-from langchain_mistralai import ChatMistralAI
+from langchain_groq import ChatGroq
 from langgraph.prebuilt import create_react_agent
 
 from app.core.config import settings
 from app.graph.tools import TOOLS
 
 
-model = ChatMistralAI(
-    model="mistral-small-latest",
-    api_key=settings.MISTRAL_API_KEY,
+model = ChatGroq(
+    model="llama-3.3-70b-versatile",
+    api_key=settings.GROQ_API_KEY,
     temperature=0.2,
 )
 

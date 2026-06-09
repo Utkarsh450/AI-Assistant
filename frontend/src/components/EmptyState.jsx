@@ -1,10 +1,10 @@
 import React from "react";
 
 const suggestions = [
-  { icon: "📄", label: "Summarize this document", prompt: "Can you give me a concise summary of this document?" },
-  { icon: "🔍", label: "Find key insights", prompt: "What are the key insights and main takeaways?" },
-  { icon: "❓", label: "Ask a question", prompt: "What questions does this document answer?" },
-  { icon: "✍️", label: "Extract action items", prompt: "List all action items or next steps mentioned." },
+  { icon: "🔍", label: "Search the web", prompt: "What are the latest breakthroughs in AI technology?" },
+  { icon: "💡", label: "Brainstorm ideas", prompt: "Suggest 5 creative names for a software product." },
+  { icon: "🐍", label: "Explain Python code", prompt: "Explain how list comprehensions work in Python." },
+  { icon: "✍️", label: "Draft an email", prompt: "Write a polite follow-up email to a hiring manager." },
 ];
 
 export default function EmptyState({ onSuggestion }) {
@@ -35,7 +35,7 @@ export default function EmptyState({ onSuggestion }) {
         How can I help?
       </h2>
       <p className="text-sm text-white/35 max-w-xs mb-10 leading-relaxed">
-        Upload a document and ask me anything about it. I can summarize, explain, and extract information.
+        Ask me anything! I can answer questions, search the web, write code, and help brainstorm ideas.
       </p>
 
       {/* Suggestion chips */}

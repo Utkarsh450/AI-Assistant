@@ -69,7 +69,7 @@ export default function ChatInput({ onSend, disabled }) {
           onKeyDown={handleKeyDown}
           disabled={disabled}
           rows={1}
-          placeholder="Ask me anything about your document…"
+          placeholder="Ask me anything…"
           className="w-full resize-none bg-transparent px-4 pt-3.5 pb-2 text-sm text-white/85 placeholder-white/25 outline-none leading-relaxed disabled:opacity-60"
           style={{ maxHeight: "200px" }}
         />
